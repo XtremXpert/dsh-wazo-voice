@@ -98,5 +98,9 @@ node --test test/*.test.mjs
 
 ## Licence
 
-À définir avant toute publication publique (MIT ou Apache-2.0), et à accorder
-avec la licence des extraits audio utilisés, qui ne sont pas versionnés.
+MIT (voir `LICENSE`).
+
+Les extraits audio ne sont pas versionnés : voir `assets/README.md`. L'extrait
+livré avec Asterisk (FreePlay) reste réservé à l'usage du PBX et n'est pas
+redistribuable ; les enregistrements du domaine public (Satie, Joplin) le
+sont.
