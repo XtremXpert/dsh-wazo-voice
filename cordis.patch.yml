@@ -1,0 +1,7 @@
+# La conversation vocale Wazo : un serveur AudioSocket tenu par le hôte DSH.
+# La config par défaut vit dans lib/config.js ; surcharger ici uniquement ce
+# qui diffère de cette machine (ports, URL d'ASR/TTS, AMI).
+- insert:
+    - id: wazo-voice
+      name: '@local/dsh-wazo-voice'
+      config: {}

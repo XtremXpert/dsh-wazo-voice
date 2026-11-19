@@ -1,0 +1,8 @@
+node_modules/
+.DS_Store
+
+# Les pistes audio ne sont pas versionnées : trop lourdes, et la piste
+# Asterisk (FreePlay) n'est pas redistribuable. Voir assets/README.md.
+assets/*.wav
+assets/*.ogg
+assets/*.mp3

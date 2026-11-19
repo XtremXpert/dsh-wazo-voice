@@ -1,0 +1,7 @@
+{
+  "meta": {
+    "title": "Voix Wazo",
+    "description": "Répond à un appel Wazo avec l'agent du Harness et prononce ses réponses ; peut aussi appeler un poste. AudioSocket entrant, AMI sortant, transcription et synthèse locales.",
+    "detail": "docs/DETAIL.md"
+  }
+}
