@@ -3,6 +3,8 @@
 Faire parler une session **DeepSeek Harness** au téléphone, par un PBX
 **Wazo / Asterisk**, en AudioSocket, avec transcription et synthèse locales.
 
+> English version: `README.en.md`.
+
 ## Le besoin que ce module comble
 
 Les solutions existantes qui branchent un agent IA sur un PBX supposent toutes

@@ -5,6 +5,8 @@ Harness, sur un PBX **Wazo**. Le plugin tient les deux sens du média : il
 entend (transcription), il parle (synthèse), et c'est **la session d'agent**
 qui répond — pas une façade HTTP.
 
+> English version: `docs/DETAIL.en.md`.
+
 ## Comment un appel arrive
 
 ```
@@ -32,6 +34,19 @@ Le plugin écoute sur **deux ports** par défaut (8092 et 8090) parce que le pla
 de numérotation déployé a utilisé l'un puis l'autre. Un port occupé est
 signalé ; l'autre continue.
 
+## Ce que l'appel donne à entendre
+
+- **Musique d'attente** pendant la réflexion de l'agent, dès que le tour
+  commence et jusqu'à la première trame de la réponse. La boucle vient de
+  `holdMusic.file` (WAV PCM 16 bits mono 8 kHz) ou, à défaut, d'une boucle
+  synthétisée sans dépendance. Elle s'arrête net : jamais de chevauchement avec
+  la voix.
+- **Réponses écrites** : une réponse tapée dans la conversation de l'appel est
+  aussi prononcée sur la ligne, avec un nettoyage du markdown avant synthèse.
+  L'agent et l'humain gardent le même fil, en texte et en voix.
+- **Extraits audio** : `wazo_voice_play` joue un WAV (musique, ambiance) sur la
+  ligne, sans passer par la synthèse.
+
 ## Outils exposés à l'agent
 
 | Outil | Rôle |
@@ -39,7 +54,8 @@ signalé ; l'autre continue.
 | `wazo_voice_call` | Appelle un poste (`to`, `opening`) et parle à qui décroche. |
 | `wazo_voice_status` | Ports écoutés, appel en cours, dernier appel, ASR/TTS disponibles, secret AMI présent. |
 | `wazo_voice_say` | Dit une phrase sur l'appel en cours, hors tour de l'agent. |
-| `wazo_voice_hangup` | Raccroche l'appel en cours. |
+| `wazo_voice_play` | Joue un extrait d'un WAV sur la ligne (`file`, `seconds`). |
+| `wazo_voice_hangup` | Raccroche l'appel en cours, après la phrase en cours. |
 | `wazo_voice_configure` | Enregistre le secret AMI dans le magasin de justificatifs (jamais dans la config). |
 
 La session d'appel est **dédiée** (`agent.sessionId`, défaut `wazo-voice`) : un
@@ -72,18 +88,19 @@ les valeurs par défaut sont dans `lib/config.js`, et seules les différences on
 besoin d'être écrites.
 
 ```yaml
-- insert:
-    - id: wazo-voice
-      name: '@local/dsh-wazo-voice'
-      config:
-        ports: [8092]
-        asr: { url: 'http://127.0.0.1:9030/', language: 'fr' }
-        tts: { voice: 'ff_siwis' }
-        ami:
-          host: 192.168.234.60
-          user: dsh
-          channelTemplate: 'PJSIP/{to}'
-          # context/exten ne servent que si application vaut '' (forme historique).
+- id: wazo-voice
+  name: '@local/dsh-wazo-voice'
+  config:
+    ports: [8092]
+    asr: { url: 'http://127.0.0.1:9030/', language: 'fr' }
+    tts: { voice: 'ff_siwis' }
+    holdMusic:
+      file: /chemin/vers/attente.wav
+    ami:
+      host: 192.168.234.60
+      user: dsh
+      channelTemplate: 'PJSIP/{to}'
+      # context/exten ne servent que si application vaut '' (forme historique).
 ```
 
 ## Limites connues
@@ -92,15 +109,19 @@ besoin d'être écrites.
   dans `dropped`) pour que la synthèse ne soit pas transcrite. Parler par-dessus
   la réponse est donc perdu, et un énoncé commencé pendant la synthèse arrive
   tronqué — d'où des transcriptions parfois fautives. Attendre la fin de la
-  phrase de l'agent est la bonne façon de parler.
+  phrase de l'agent est la bonne façon de parler. C'est le premier chantier si
+  le module doit servir ailleurs que dans ce contexte.
+- **Le direct l'emporte** : pendant la musique d'attente, l'audio entrant est
+  encore capté et mis en file ; un énoncé trop long pendant la réflexion peut
+  dépasser `maxQueuedTurns` et être remplacé par le plus récent.
 - **Raccrochage** : l'agent doit appeler `wazo_voice_hangup` ; sinon la ligne
   reste ouverte jusqu'à ce que l'humain raccroche. Le raccrochage demandé
   pendant un tour attend la fin de la phrase en cours.
 - **Une ligne à la fois** : un seul appel actif ; `wazo_voice_call` refuse
   pendant un appel.
 - **Latence** : le tour est séquentiel (fin d'énoncé → transcription → agent →
-  synthèse). Une réponse qui appelle des outils prend le temps des outils ;
-  `wazo_voice_say` permet d'annoncer l'attente.
+  synthèse). Une réponse qui appelle des outils prend le temps des outils ; la
+  musique d'attente et `wazo_voice_say` meublent l'attente.
 - **8 kHz** : bande passante téléphonique ; la transcription puis la synthèse
   gardent cette qualité, sans modèle embarqué.
 - **`Originate` n'est pas un décrochage** : la réponse AMI prouve la mise en
@@ -112,11 +133,11 @@ besoin d'être écrites.
 
 ## Vérification
 
-`node --test test/*.test.mjs` couvre 30 cas : cadrage AudioSocket fragmenté,
+`node --test test/*.test.mjs` couvre 40 cas : cadrage AudioSocket fragmenté,
 détection de parole, rééchantillonnage 24 kHz → 8 kHz, client AMI sur un
-serveur simulé (dont `Application`/`Data`), et un **bouclage complet** (client
-AudioSocket synthétique → ASR → agent → synthèse → trames de 20 ms), entrant et
-sortant.
+serveur simulé, musique d'attente (boucle, niveaux, lecture WAV), et un
+**bouclage complet** (client AudioSocket synthétique → ASR → agent → synthèse →
+trames de 20 ms), entrant et sortant.
 
 L'appel réel dépend du PBX et d'un combiné : il se vérifie sur le terrain, pas
 en test unitaire.

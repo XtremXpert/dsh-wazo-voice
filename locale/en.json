@@ -2,6 +2,6 @@
   "meta": {
     "title": "Wazo voice",
     "description": "Answers a Wazo phone call with the Harness agent and speaks its replies; it can also call a phone. Inbound AudioSocket, outbound AMI, local speech recognition and synthesis.",
-    "detail": "docs/DETAIL.md"
+    "detail": "docs/DETAIL.en.md"
   }
 }
