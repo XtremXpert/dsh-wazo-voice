@@ -1,9 +1,8 @@
 {
-  "name": "@local/dsh-wazo-voice",
+  "name": "dsh-wazo-voice",
   "version": "0.1.0",
-  "private": true,
   "type": "module",
-  "description": "Conversation vocale bidirectionnelle avec un PBX Wazo : AudioSocket, transcription, agent DSH, synthèse, appel sortant AMI.",
+  "description": "Voice bridge between a Wazo/Asterisk PBX (AudioSocket) and a DeepSeek Harness session: local speech recognition and synthesis, hold music, spoken text replies.",
   "main": "index.js",
   "exports": {
     ".": "./index.js",
@@ -26,5 +25,27 @@
       "patch": "./cordis.patch.yml"
     }
   },
-  "license": "MIT"
+  "license": "MIT",
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "wazo",
+    "asterisk",
+    "audiosocket",
+    "voice",
+    "whisper",
+    "kokoro",
+    "telephony"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/XtremXpert/dsh-wazo-voice.git"
+  },
+  "homepage": "https://github.com/XtremXpert/dsh-wazo-voice#readme",
+  "bugs": {
+    "url": "https://github.com/XtremXpert/dsh-wazo-voice/issues"
+  },
+  "engines": {
+    "node": ">=20"
+  }
 }
